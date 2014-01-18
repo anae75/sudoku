@@ -32,7 +32,7 @@ describe Board do
       @board = Board.new
       @board.position(4,1).assign(5)
     end
-    let(:board) { @board} 
+    let(:board) { @board}
     it 'knows that the number is in that row' do
       expect(board.row(4).contains?(5)).to be true
       expect(board.row(4).contains?(7)).to be false
@@ -42,4 +42,22 @@ describe Board do
       expect(board.column(1).contains?(7)).to be false
     end
   end
+
+  context 'a number is assigned to a position and then changed' do
+    before do
+      @board = Board.new
+      @board.position(4,1).assign(5)
+      @board.position(4,1).assign(8)
+    end
+    let(:board) { @board}
+    it 'knows that the number is in that row' do
+      expect(board.row(4).contains?(5)).to be false
+      expect(board.row(4).contains?(8)).to be true
+    end
+    it 'knows that the number is in that column' do
+      expect(board.column(1).contains?(5)).to be false
+      expect(board.column(1).contains?(8)).to be true
+    end
+  end
+
 end

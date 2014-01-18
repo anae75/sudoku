@@ -6,6 +6,7 @@ class Board
       @rows << NumberSet.new
       @columns << NumberSet.new
     end
+    @positions = {}
   end
 
   def rows
@@ -18,8 +19,9 @@ class Board
     return (0..8).to_a
   end
 
-  def position(rownum, columnum)
-    return Position.new(self, row(rownum), column(columnum))
+  def position(rownum, columnnum)
+    pos = ( @positions[[rownum, columnnum]] ||= Position.new(self, row(rownum), column(columnnum)) )
+    pos
   end
 
   def row(num)
@@ -46,8 +48,10 @@ class Board
     end
 
     def assign(newval)
+      @row.remove(@value) if @value
+      @column.remove(@value) if @value
+
       @value = newval
-      # remove old val?
       @row.add(newval)
       @column.add(newval)
     end
@@ -64,6 +68,9 @@ class Board
     end
     def add(num)
       @values[num] = true
+    end
+    def remove(num)
+      @values[num] = false
     end
   end
 end
