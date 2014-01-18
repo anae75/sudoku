@@ -1,0 +1,33 @@
+
+- for each blank space:
+  - add 0..9 as candidates the first time otherwise carry over candidates for previous turn
+  - remove all conflicts (occurs in row, occurs in column, occurs in square)
+  - if only 1 candidate remains, assign that candidate
+
+- for each row/column/square
+  - if a candidate is unique within that row/column/square, assign it
+
+- if an entire iteration occurs with no change in candidates then we have an infinite loop
+
+
+
+- set up a board:
+
+  - assigning a number to a position means:
+    - we can ask pos.row.contains?(number)
+    - we can ask pos.column.contains?(number)
+    - we can ask pos.square.contains?(number)
+
+  - set a position to be empty
+
+
+- solve the game
+  - find all empty positions
+  - pos.add_candidate(num)
+  - pos.remove_candidate(num)
+  - pos.candidates
+  - pos.assign(num) -- updates row, column and square
+
+  - pos.remove_bad_candidates
+
+
