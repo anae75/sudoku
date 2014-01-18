@@ -1,6 +1,8 @@
 require 'spec_helper'
 require_relative '../board'
 
+include Sudoku
+
 describe Board do
   it 'can be created' do
     Board.new
@@ -25,6 +27,12 @@ describe Board do
 
   it 'can assign a number to a position' do
     board.position(4,1).assign(5)
+  end
+
+  it 'knows which square a position belongs to' do
+    expect(board.square(0,0)).to be(board.squares[0])
+    expect(board.square(4,1)).to be(board.squares[3])
+    expect(board.square(6,6)).to be(board.squares[8])
   end
 
   context 'a number is assigned to a position' do
