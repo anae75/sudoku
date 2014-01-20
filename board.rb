@@ -55,6 +55,7 @@ module Sudoku
         @row = row
         @column = column
         @square = square
+        @candidates = nil
       end
 
       def assign(newval)
@@ -66,6 +67,20 @@ module Sudoku
         @row.add(newval)
         @column.add(newval)
         @square.add(newval)
+      end
+
+      def clear_candidates
+        @candidates = nil
+      end
+
+      def candidates
+        return @candidates if @candidates
+        @candidates = VALID_NUMBERS.dup
+
+        # reject candidates that appear in the row, column, square
+        @candidates -= @row.items
+        @candidates -= @column.items
+        @candidates -= @square.items
       end
     end
   end
@@ -83,6 +98,9 @@ module Sudoku
       end
       def remove(num)
         @values[num] = false
+      end
+      def items
+        @values.keys
       end
     end
   end
