@@ -28,6 +28,12 @@ describe Game do
     end
   end
 
+  it 'can solve a medium game' do
+    game = Game.new game_03_medium
+    game.solve
+    game.board.pprint
+  end
+
   it 'can solve a hard game', :hard => true do
     game = Game.new game_02_hard
     game.solve
@@ -64,5 +70,21 @@ _8_ 2_6 _9_
 3_2 _1_ 8__
 _1_ 5__ ___
   END
+  end
+
+  def game_03_medium
+<<-END
+  ___ _46 _2_
+  _5_ ___ __6
+  ___ 953 1__
+
+  __9 __8 2_4
+  8_2 ___ 3_1
+  4_5 3__ 8__
+
+  __8 164 ___
+  6__ ___ _8_
+  _2_ 83_ ___
+END
   end
 end
