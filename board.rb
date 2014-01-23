@@ -56,11 +56,17 @@ module Sudoku
       arr
     end
 
-    def pprint
+    def pprint(value=nil, defchar='#')
       9.times do |row|
         9.times do |col|
           pos = position(row, col)
-          print pos.value || '_'
+          char = case
+            when value && pos.value && pos.value!=value
+              defchar
+            else
+              pos.value || '_'
+            end
+          print char
           print ' ' if (col+1) % 3 == 0
         end
         puts
@@ -239,6 +245,7 @@ module Sudoku
       num = old_num = @board.empty_positions.size
       while num > 0
         num = advance
+        binding.pry if num == old_num # debug infinite loop
         raise 'infinite loop' if num == old_num
         old_num = num
       end
