@@ -62,6 +62,29 @@ module Sudoku
       arr
     end
 
+    def update
+      positions = empty_positions
+      positions.each { |pos| pos.reset_candidates }
+
+      @squares.each do |square|
+         # for each row in the square, if a candidate value appears ONLY in this row then remove
+         # that value from any other position in that row
+         sep = square.empty_positions
+         sep.group_by { |pos| pos.row } .each do |group, elements|
+           other = (sep - elements).collect { |pos| pos.candidates }.flatten
+           puts other.uniq.sort.inspect
+           elements.collect(&:candidates).flatten.each do |value|
+             if !other.include?(value)
+               puts "removing #{value} from other candidates in the rest of this row"
+               (group.empty_positions - elements).each { |elem| elem.remove_candidate(value) }
+             end
+           end
+         end
+      end
+
+      #binding.pry
+    end
+
     def pprint(value=nil, defchar='#')
       9.times do |row|
         print '   '
@@ -127,10 +150,11 @@ module Sudoku
         @candidates = nil
       end
 
-      def candidates
-        return @candidates if @candidates
+      def reset_candidates
+        if @value 
+          return @candidates = []
+        end
         @candidates = VALID_NUMBERS.dup
-
         # reject candidates that appear in the row, column, square
         @candidates -= @row.items
         @candidates -= @column.items
@@ -138,9 +162,20 @@ module Sudoku
         @candidates
       end
 
+      def candidates
+        @candidates || reset_candidates
+      end
+
       def update
-        clear_candidates
-        return candidates
+        candidates
+        @candidates -= @row.items
+        @candidates -= @column.items
+        @candidates -= @square.items
+        @candidates
+      end
+
+      def remove_candidate(value)
+        @candidates.delete(value)
       end
     end
   end
@@ -183,6 +218,9 @@ module Sudoku
           @positions << pos
         end
       end
+      def empty_positions
+        @positions.select { |pos| !pos.value }
+      end
     end
   end
 
@@ -212,15 +250,16 @@ module Sudoku
     end
 
     def advance
+      @board.update     # updates all candidates
       positions = @board.empty_positions
-      
+
       # update all empty positions and assign those that have only one candidate
       old_num_empty = positions.size
       positions.each do |pos|
-        candidates = pos.update
+        pos.update
+        candidates = pos.candidates
         if candidates.size == 1
           puts "found single candidate for #{pos.name}: #{candidates.first}"
-          binding.pry
           pos.assign(candidates.first)
         end
       end
@@ -233,11 +272,11 @@ module Sudoku
       groups = positions.group_by { |pos| pos.row }
       reduce_groups(groups, 'row')
       positions.reject! { |pos| pos.value }
-      positions.each { |pos| pos.update }
+      @board.update
 
       reduce_groups( positions.group_by { |pos| pos.column }, 'column' )
       positions.reject! { |pos| pos.value }
-      positions.each { |pos| pos.update }
+      @board.update
 
       reduce_groups( positions.group_by { |pos| pos.square }, 'square' )
       positions.reject! { |pos| pos.value }
@@ -266,12 +305,16 @@ module Sudoku
 
     def solve
       niter = 0
+      iter_history = []
       num = old_num = @board.empty_positions.size
       while num > 0
         num = advance
         niter += 1
-        binding.pry if num == old_num # debug infinite loop
-        raise "infinite loop in iteration #{niter}" if num == old_num
+        iter_history << num
+        if iter_history.size > 2 && iter_history[-2,2].uniq.size == 1
+          binding.pry
+          raise "infinite loop in iteration #{niter}"
+        end
         old_num = num
       end
     end
