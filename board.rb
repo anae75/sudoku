@@ -10,9 +10,9 @@ module Sudoku
       @columns = []
       @squares = []
       9.times do
-        @rows << NumberSet.new
-        @columns << NumberSet.new
-        @squares << NumberSet.new
+        @rows << PositionSet.new
+        @columns << PositionSet.new
+        @squares << PositionSet.new
       end
       @positions = {}
     end
@@ -25,8 +25,14 @@ module Sudoku
     end
 
     def position(rownum, columnnum)
-      pos = ( @positions[[rownum, columnnum]] ||= 
-            Position.new("#{rownum},#{columnnum}", self, row(rownum), column(columnnum), square(rownum,columnnum)) )
+      pos =  @positions[[rownum, columnnum]] 
+      if !pos
+        pos = Position.new("#{rownum},#{columnnum}", self, row(rownum), column(columnnum), square(rownum,columnnum))
+        @positions[[rownum, columnnum]] = pos
+        row(rownum).add pos, columnnum
+        column(columnnum).add pos, rownum
+        square(rownum, columnnum).add pos
+      end
       pos
     end
 
@@ -113,14 +119,7 @@ module Sudoku
 
       def assign(newval)
         clear_candidates
-        @row.remove(@value) if @value
-        @column.remove(@value) if @value
-        @square.remove(@value) if @value
-
         @value = newval
-        @row.add(newval)
-        @column.add(newval)
-        @square.add(newval)
       end
 
       def clear_candidates
@@ -161,6 +160,27 @@ module Sudoku
       end
       def items
         @values.keys
+      end
+    end
+  end
+
+  class Board
+    class PositionSet
+      def initialize
+        @positions = []
+      end
+      def items
+        @positions.compact.collect { |pos| pos.value } .compact
+      end
+      def contains?(num)
+        items.include? num
+      end
+      def add(pos, index=nil)
+        if index
+          @positions[index] = pos 
+        else
+          @positions << pos
+        end
       end
     end
   end

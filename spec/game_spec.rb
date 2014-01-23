@@ -18,7 +18,7 @@ describe Game do
   #  game.advance
   #end
 
-  it 'can solve an easy game' do
+  it 'can solve an easy game', :game => true do
     game = Game.new game_01_easy
     num = old_num = game.board.empty_positions.size
     while num > 0
@@ -28,13 +28,13 @@ describe Game do
     end
   end
 
-  it 'can solve a medium game' do
+  it 'can solve a medium game', :game => true do
     game = Game.new game_03_medium
     game.solve
     game.board.pprint
   end
 
-  it 'can solve a hard game', :hard => true do
+  it 'can solve a hard game', :hard => true, :game => true do
     game = Game.new game_02_hard
     game.solve
     game.board.pprint
