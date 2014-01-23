@@ -24,7 +24,7 @@ module Sudoku
 
     def position(rownum, columnnum)
       pos = ( @positions[[rownum, columnnum]] ||= 
-            Position.new(self, row(rownum), column(columnnum), square(rownum,columnnum)) )
+            Position.new("#{rownum},#{columnnum}", self, row(rownum), column(columnnum), square(rownum,columnnum)) )
       pos
     end
 
@@ -73,10 +73,11 @@ module Sudoku
   class Board
     class Position
 
-      attr_reader :row, :column, :square
+      attr_reader :name, :row, :column, :square
       attr_reader :value
 
-      def initialize(board, row, column, square)
+      def initialize(name, board, row, column, square)
+        @name = name
         @value = nil
         @board = board
         @row = row
@@ -86,6 +87,7 @@ module Sudoku
       end
 
       def assign(newval)
+        clear_candidates
         @row.remove(@value) if @value
         @column.remove(@value) if @value
         @square.remove(@value) if @value
@@ -165,6 +167,8 @@ module Sudoku
 
     def advance
       positions = @board.empty_positions
+      
+      # update all empty positions and assign those that have only one candidate
       old_num_empty = positions.size
       positions.each do |pos|
         candidates = pos.update
@@ -176,7 +180,37 @@ module Sudoku
       new_num_empty = positions.size
       puts "#{old_num_empty} => #{new_num_empty}"
       @board.pprint
+
+      # go through the rows and update all those that are not ambiguous
+      groups = positions.group_by { |pos| pos.row }
+      reduce_groups(groups, 'row')
+      positions.reject! { |pos| pos.value }
+      positions.each { |pos| pos.update }
+
+      reduce_groups( positions.group_by { |pos| pos.column }, 'column' )
+      positions.reject! { |pos| pos.value }
+      positions.each { |pos| pos.update }
+
+      reduce_groups( positions.group_by { |pos| pos.square }, 'square' )
+      positions.reject! { |pos| pos.value }
+
       return positions.size
+    end
+
+    def reduce_groups(groups, name)
+      groups.each do |group, elements|
+        elements.each do |pos|
+          others = (elements - [pos]).collect(&:candidates).flatten
+          pos.candidates.each do |candidate_val|
+            next if others.include?(candidate_val)
+            puts "Found unique candidate for position #{pos.name} in #{name}: #{candidate_val}"
+            puts "others:", others.inspect
+            pos.assign(candidate_val)
+            @board.pprint
+            break
+          end
+        end
+      end
     end
 
     def solve

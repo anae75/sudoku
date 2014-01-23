@@ -31,6 +31,7 @@ describe Game do
   it 'can solve a hard game' do
     game = Game.new game_02_hard
     game.solve
+    game.board.pprint
   end
 
   def game_01_easy
