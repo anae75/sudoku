@@ -1,3 +1,5 @@
+require 'pry' 
+
 module Sudoku
   VALID_NUMBERS = (1..9).to_a
 
@@ -65,6 +67,23 @@ module Sudoku
         puts if (row+1) % 3 == 0
       end
 
+    end
+
+    def validate_values(values)
+      errors = []
+      errors << "duplicate values" if values.size != values.uniq.size 
+      values.each do |val|
+        errors << "invalid value #{val}" unless VALID_NUMBERS.include?(val) 
+      end
+      errors
+    end
+
+    def valid?
+      9.times do |rownum|
+        row_values = (0..8).collect { |colnum| position(rownum, colnum).value }.compact 
+        errors = validate_values(row_values)
+        raise "problem with row #{rownum} (#{row_values.inspect}): #{errors.join("\n")}" unless errors.empty?
+      end
     end
 
   end
@@ -194,13 +213,16 @@ module Sudoku
       reduce_groups( positions.group_by { |pos| pos.square }, 'square' )
       positions.reject! { |pos| pos.value }
 
+      @board.valid?
       return positions.size
     end
 
     def reduce_groups(groups, name)
       groups.each do |group, elements|
         elements.each do |pos|
+          elements.each { |elem| elem.update }
           others = (elements - [pos]).collect(&:candidates).flatten
+          puts ">> #{pos.candidates.sort} vs #{others.uniq.sort}"
           pos.candidates.each do |candidate_val|
             next if others.include?(candidate_val)
             puts "Found unique candidate for position #{pos.name} in #{name}: #{candidate_val}"
