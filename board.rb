@@ -43,11 +43,25 @@ module Sudoku
       @squares[index]
     end
 
+    def empty_positions
+      arr = []
+      9.times do |row|
+        9.times do |col|
+          pos = position(row, col)
+          arr << pos unless pos.value
+        end
+      end
+      arr
+    end
+
   end
 
 
   class Board
     class Position
+
+      attr_reader :row, :column, :square
+      attr_reader :value
 
       def initialize(board, row, column, square)
         @value = nil
@@ -105,5 +119,34 @@ module Sudoku
     end
   end
 
+  class Game
+    attr_reader :board
+    def initialize(str)
+      @board = Board.new
+
+      lines = str.split(/$/).collect(&:strip).reject { |x| !x || x.empty? }
+      positions = lines.collect do |line|
+          line.gsub(/\s/,'').split //
+        end
+
+      # sanity check
+      raise "Wrong number of lines #{positions.size}" unless positions.size == 9
+      positions.each_with_index do |line, index|
+        raise "Wrong number of chars in line #{index} (#{line})" unless line.size == 9
+      end
+
+      # set up the board
+      positions.each_with_index do |line, row_index|
+        line.each_with_index do |value, col_index|
+          next if value == '_'
+          @board.position(row_index, col_index).assign(value.to_i)
+        end
+      end
+    end
+
+    def advance
+      positions = @board.empty_positions
+    end
+  end
 
 end
