@@ -64,6 +64,7 @@ module Sudoku
 
     def pprint(value=nil, defchar='#')
       9.times do |row|
+        print '   '
         9.times do |col|
           pos = position(row, col)
           char = case
@@ -78,7 +79,7 @@ module Sudoku
         puts
         puts if (row+1) % 3 == 0
       end
-
+      puts '-'*30
     end
 
     def validate_values(values)
@@ -218,6 +219,8 @@ module Sudoku
       positions.each do |pos|
         candidates = pos.update
         if candidates.size == 1
+          puts "found single candidate for #{pos.name}: #{candidates.first}"
+          binding.pry
           pos.assign(candidates.first)
         end
       end
@@ -262,11 +265,13 @@ module Sudoku
     end
 
     def solve
+      niter = 0
       num = old_num = @board.empty_positions.size
       while num > 0
         num = advance
+        niter += 1
         binding.pry if num == old_num # debug infinite loop
-        raise 'infinite loop' if num == old_num
+        raise "infinite loop in iteration #{niter}" if num == old_num
         old_num = num
       end
     end
