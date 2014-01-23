@@ -54,6 +54,19 @@ module Sudoku
       arr
     end
 
+    def pprint
+      9.times do |row|
+        9.times do |col|
+          pos = position(row, col)
+          print pos.value || '_'
+          print ' ' if (col+1) % 3 == 0
+        end
+        puts
+        puts if (row+1) % 3 == 0
+      end
+
+    end
+
   end
 
 
@@ -95,6 +108,12 @@ module Sudoku
         @candidates -= @row.items
         @candidates -= @column.items
         @candidates -= @square.items
+        @candidates
+      end
+
+      def update
+        clear_candidates
+        return candidates
       end
     end
   end
@@ -146,6 +165,18 @@ module Sudoku
 
     def advance
       positions = @board.empty_positions
+      old_num_empty = positions.size
+      positions.each do |pos|
+        candidates = pos.update
+        if candidates.size == 1
+          pos.assign(candidates.first)
+        end
+      end
+      positions.reject! { |pos| pos.value }
+      new_num_empty = positions.size
+      puts "#{old_num_empty} => #{new_num_empty}"
+      @board.pprint
+      return positions.size
     end
   end
 

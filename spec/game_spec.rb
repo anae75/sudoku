@@ -13,9 +13,19 @@ describe Game do
     expect(game.board.position(7,1).value).to be_nil
   end
 
-  it 'can solve 1 turn' do
+  #it 'can advance 1 turn' do
+  #  game = Game.new game_01_easy
+  #  game.advance
+  #end
+
+  it 'can solve a game' do
     game = Game.new game_01_easy
-    game.advance
+    num = old_num = game.board.empty_positions.size
+    while num > 0
+      num = game.advance
+      raise 'infinite loop' if num == old_num
+      old_num = num
+    end
   end
 
   def game_01_easy
