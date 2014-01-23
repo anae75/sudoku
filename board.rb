@@ -178,6 +178,15 @@ module Sudoku
       @board.pprint
       return positions.size
     end
+
+    def solve
+      num = old_num = @board.empty_positions.size
+      while num > 0
+        num = advance
+        raise 'infinite loop' if num == old_num
+        old_num = num
+      end
+    end
   end
 
 end

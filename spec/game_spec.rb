@@ -18,7 +18,7 @@ describe Game do
   #  game.advance
   #end
 
-  it 'can solve a game' do
+  it 'can solve an easy game' do
     game = Game.new game_01_easy
     num = old_num = game.board.empty_positions.size
     while num > 0
@@ -26,6 +26,11 @@ describe Game do
       raise 'infinite loop' if num == old_num
       old_num = num
     end
+  end
+
+  it 'can solve a hard game' do
+    game = Game.new game_02_hard
+    game.solve
   end
 
   def game_01_easy
@@ -41,6 +46,22 @@ __4 _9_ 1_3
 692 7_5 834
 8_7 _3_ 5__
 4_5 689 271
+  END
+  end
+
+  def game_02_hard
+  <<-END
+___ __2 _8_
+__8 _9_ 2_7
+_4_ 8_7 _1_
+
+__1 4__ 9_8
+_5_ ___ _3_
+8_9 __3 5__
+
+_8_ 2_6 _9_
+3_2 _1_ 8__
+_1_ 5__ ___
   END
   end
 end
